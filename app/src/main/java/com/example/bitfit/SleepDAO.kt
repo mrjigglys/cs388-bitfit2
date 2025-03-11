@@ -15,4 +15,7 @@ interface SleepDao {
 
     @Query("DELETE FROM sleep_table")
     fun deleteAll()
+
+    //For Summary
+
 }
