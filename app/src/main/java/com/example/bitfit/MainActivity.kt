@@ -23,6 +23,22 @@ class MainActivity : AppCompatActivity() {
         val view = binding.root
         setContentView(view)
 
+        //Get from DB
+        lifecycleScope.launch{
+            (application as SleepApplication).db.sleepDao().getAll().collect { databaseList ->
+                databaseList.map { entity ->
+                    Sleep(
+                        entity.date,
+                        entity.hours,
+                        entity.minutes
+                    )
+                }.also {mappedList ->
+                    sleeps.clear()
+                    sleeps.addAll(mappedList)
+                }
+            }
+        }
+
         val fragmentManager: FragmentManager = supportFragmentManager
         //Fragments
         val sleepFragment: Fragment = SleepFragment()
@@ -47,5 +63,21 @@ class MainActivity : AppCompatActivity() {
         val fragmentTransaction = fragmentManager.beginTransaction()
         fragmentTransaction.replace(R.id.frame_layout, fragment)
         fragmentTransaction.commit()
+    }
+
+    fun addToDB(newSleep: Sleep) {
+        lifecycleScope.launch(IO) {
+            (application as SleepApplication).db.sleepDao().deleteAll()
+            (application as SleepApplication).db.sleepDao().insertAll(sleeps.map {
+                SleepEntity(
+                    date = it.date,
+                    hours = it.hours,
+                    minutes = it.minutes
+                )
+            })}
+    }
+
+    fun getDB() : MutableList<Sleep>{
+        return sleeps
     }
 }

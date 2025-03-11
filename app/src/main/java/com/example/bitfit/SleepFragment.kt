@@ -1,5 +1,6 @@
 package com.example.bitfit
 
+import android.content.Context
 import android.os.Bundle
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
@@ -16,13 +17,11 @@ import kotlinx.coroutines.launch
 private const val TAG = "SleepFragment"
 
 class SleepFragment : Fragment() {
-    private val sleeps = mutableListOf<Sleep>()
-    private var application = SleepApplication()
+    private var sleeps = mutableListOf<Sleep>()
     private lateinit var sleepRecyclerView: RecyclerView
     private lateinit var sleepAdapter: SleepAdapter
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
     }
 
     override fun onCreateView(
@@ -31,11 +30,16 @@ class SleepFragment : Fragment() {
     ): View? {
         val view = inflater.inflate(R.layout.fragment_sleep, container, false)
         val layoutManager = LinearLayoutManager(context)
+
+        //Get sleeps from MainActivity, update adapter
+        sleeps = (activity as MainActivity).getDB()
+
         sleepRecyclerView = view.findViewById(R.id.sleepRv)
         sleepRecyclerView.layoutManager = layoutManager
         sleepRecyclerView.setHasFixedSize(true)
         sleepAdapter = SleepAdapter(sleeps)
         sleepRecyclerView.adapter = sleepAdapter
+
 
         val hoursInput = view.findViewById<EditText>(R.id.hoursInput)
         val minutesInput = view.findViewById<EditText>(R.id.minutesInput)
@@ -46,15 +50,7 @@ class SleepFragment : Fragment() {
             val newSleep = Sleep(dateInput.text.toString(), hoursInput.text.toString(), minutesInput.text.toString())
             addToList(newSleep)
             //Add to db
-//            lifecycleScope.launch(IO) {
-//            (application as SleepApplication).db.sleepDao().deleteAll()
-//            (application as SleepApplication).db.sleepDao().insertAll(sleeps.map {
-//                SleepEntity(
-//                    date = it.date,
-//                    hours = it.hours,
-//                    minutes = it.minutes
-//                )
-//            })}
+            (activity as MainActivity).addToDB(newSleep)
         }
         return view
     }
